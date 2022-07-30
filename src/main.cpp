@@ -9,21 +9,22 @@
 #define MPU6050_WHO_AM_I 0x75   // Read Only
 #define MPU6050_PWR_MGMT_1 0x6B // Read and Write
 #define MPU_ADDRESS 0x68
-int blockSize = 20;
-int ballSize = 7;
+float BLOCKSIZE = 20;
+int BALLSIZE = 7;
 
 //加速度値
 float acc_x = 0;
 float acc_y = 0;
 // float acc_z = 0;
 //初期位置
-float x = blockSize * 1.5;
-float y = blockSize * 1.5;
+float x = BLOCKSIZE * 1.2;
+float y = BLOCKSIZE * 1.2;
 //速度
-float speed_x = 10;
-float speed_y = -10;
+float speed_x = 3;
+float speed_y = -3;
+float touch_level = 3.7;
 
-int maze[11][13];
+int maze[MEIRO_HEIGHT][MEIRO_WIDTH];
 
 void printLCD()
 {
@@ -35,8 +36,6 @@ void printLCD()
   // M5.Lcd.println(x);
   // M5.Lcd.println(y);
 
-  // x += acc_x * speed_x;
-  // y += acc_y * speed_y;
   float isOk_x = 1;
   float isOk_y = 1;
   for (int j = 0; j < MEIRO_HEIGHT; j++)
@@ -45,20 +44,32 @@ void printLCD()
     {
       if (maze[j][i] == 1)
       {
-        if ((j * blockSize - y) * (j * blockSize - y) + (i * blockSize - x - acc_x * speed_x) * (i * blockSize - x - acc_x * speed_x) < blockSize * blockSize / 1.6)
+        if ((j * BLOCKSIZE - y) * (j * BLOCKSIZE - y) + (i * BLOCKSIZE - x - acc_x * speed_x) * (i * BLOCKSIZE - x - acc_x * speed_x) < BLOCKSIZE * BLOCKSIZE / touch_level)
         {
           isOk_x = 0;
         }
-        if ((j * blockSize - y - acc_y * speed_y) * (j * blockSize - y - acc_y * speed_y) + (i * blockSize - x) * (i * blockSize - x) < blockSize * blockSize / 1.6)
+        if ((((float)j + 0.5) * BLOCKSIZE - y) * (((float)j + 0.5) * BLOCKSIZE - y) + (i * BLOCKSIZE - x - acc_x * speed_x) * (i * BLOCKSIZE - x - acc_x * speed_x) < BLOCKSIZE * BLOCKSIZE / touch_level)
         {
           isOk_y = 0;
+        }
+        if ((j * BLOCKSIZE - y - acc_y * speed_y) * (j * BLOCKSIZE - y - acc_y * speed_y) + (i * BLOCKSIZE - x) * (i * BLOCKSIZE - x) < BLOCKSIZE * BLOCKSIZE / touch_level)
+        {
+          isOk_y = 0;
+        }
+        if ((j * BLOCKSIZE - y - acc_y * speed_y) * (j * BLOCKSIZE - y - acc_y * speed_y) + (((float)i + 0.5) * BLOCKSIZE - x) * (((float)i + 0.5) * BLOCKSIZE - x) < BLOCKSIZE * BLOCKSIZE / touch_level)
+        {
+          isOk_x = 0;
         }
       }
     }
   }
-  Serial.print(isOk_x, acc_x * speed_x);
+  Serial.print(acc_x * speed_x);
   Serial.print("  ");
-  Serial.println(isOk_y, acc_y * speed_y);
+  Serial.print(isOk_x);
+  Serial.print("  ");
+  Serial.print(acc_y * speed_y);
+  Serial.print("  ");
+  Serial.println(isOk_y);
   x += (acc_x * speed_x) * isOk_x;
   y += (acc_y * speed_y) * isOk_y;
 
@@ -68,7 +79,7 @@ void printLCD()
   y = min((int)y, 220);
 
   //ボールの位置がズレているのでoffset（現物合わせ）
-  M5.Lcd.fillCircle((int)x + 7, (int)y + 7, ballSize, GREEN); // x,y,r,color
+  M5.Lcd.fillCircle((int)x + 7, (int)y + 7, BALLSIZE, GREEN); // x,y,r,color
 }
 
 void initMPU6050()
@@ -108,11 +119,11 @@ void initStage()
       {
         if ((i + j) % 2 == 0)
         {
-          M5.Lcd.fillRect(i * blockSize, j * blockSize, blockSize, blockSize, ORANGE); // x-pos,y-pos,x-size,y-size,color //orange 0xFD20
+          M5.Lcd.fillRect(i * BLOCKSIZE, j * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE, ORANGE); // x-pos,y-pos,x-size,y-size,color //orange 0xFD20
         }
         else
         {
-          M5.Lcd.fillRect(i * blockSize, j * blockSize, blockSize, blockSize, YELLOW);
+          M5.Lcd.fillRect(i * BLOCKSIZE, j * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE, YELLOW);
         }
       }
     }
@@ -143,6 +154,7 @@ long count = 0;
 unsigned long pre = 0;
 void loop()
 {
+  M5.update(); //ボタンを読み取る
   while (micros() - pre < 60 * 1000)
   {
   }
@@ -184,19 +196,21 @@ void loop()
   }
   count += 1;
 
-  if (M5.BtnA.wasPressed())
+  if (M5.BtnA.wasReleased() || M5.BtnB.pressedFor(1000, 200))
   {
-    speed_x -= 5;
-    speed_y -= 5;
+    speed_x *= 1.111;
+    speed_y *= 1.111;
     Serial.println(speed_x);
+    delay(200);
   }
-  if (M5.BtnC.wasPressed())
+  if (M5.BtnB.wasReleased() || M5.BtnB.pressedFor(1000, 200))
   {
-    speed_x += 5;
-    speed_y += 5;
+    speed_x *= 0.9;
+    speed_y *= 0.9;
     Serial.println(speed_x);
+    delay(200);
   }
-  if (M5.BtnB.wasPressed())
+  if (M5.BtnC.wasReleased() || M5.BtnB.pressedFor(1000, 200))
   {
     initStage();
   }

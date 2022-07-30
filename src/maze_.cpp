@@ -5,12 +5,6 @@
 #include "maze_.h"
 #include <Arduino.h>
 
-/* 迷路の横サイズ(奇数) */
-//#define MEIRO_WIDTH 13
-
-/* 迷路の縦サイズ(奇数) */
-//#define MEIRO_HEIGHT 11
-
 /* 迷路の各マス表す値の定義 */
 #define PATH 0
 #define WALL 1
