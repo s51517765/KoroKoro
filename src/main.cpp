@@ -57,19 +57,18 @@ void printBackground(int x, int y)
   }
 }
 
-void printLCD()
+void moveBall()
 {
   M5.Lcd.setCursor(0, 0);
-  // M5.Lcd.println(acc_x);
-  // M5.Lcd.println(acc_y);
-  // M5.Lcd.println(x);
-  // M5.Lcd.println(y);
 
   float isOk_x = 1;
   float isOk_y = 1;
-  for (float j = 0; j < MEIRO_HEIGHT; j += 0.5) // HIGHT
+  float h_start = max((int)(y / BLOCKSIZE - 1), 0);
+  float w_start = max((int)(x / BLOCKSIZE - 1), 0);
+
+  for (float j = h_start; j < h_start + 3; j += 0.5)
   {
-    for (float i = 0; i < MEIRO_WIDTH; i += 0.5) // WIDTH
+    for (float i = w_start; i < w_start + 3; i += 0.5)
     {
       if (maze[(int)(j)][(int)(i)] == 1)
       {
@@ -216,7 +215,7 @@ void loop()
     Serial.print(acc_y);
     Serial.println("");
   */
-  printLCD();
+  moveBall();
 
   if (count % 40 == 0)
   {
