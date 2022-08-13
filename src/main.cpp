@@ -12,7 +12,7 @@
 #define stepPeriod 30 //画面更新周期
 float BLOCKSIZE = 21;
 int BALLSIZE = 7;
-
+long count = 0;
 //加速度値
 float acc_x = 0;
 float acc_y = 0;
@@ -63,8 +63,17 @@ void moveBall()
 
   float isOk_x = 1;
   float isOk_y = 1;
-  float h_start = max((int)(y / BLOCKSIZE - 1), 0);
-  float w_start = max((int)(x / BLOCKSIZE - 1), 0);
+  float h_start = (y / BLOCKSIZE - 1);
+  float w_start = (x / BLOCKSIZE - 1);
+
+  if (h_start < 0)
+    h_start = 0;
+  else if (h_start > MEIRO_HEIGHT - 3)
+    h_start = MEIRO_HEIGHT - 3;
+  if (w_start < 0)
+    w_start = 0;
+  else if (w_start > MEIRO_WIDTH - 3)
+    w_start = MEIRO_WIDTH - 3;
 
   for (float j = h_start; j < h_start + 3; j += 0.5)
   {
@@ -83,25 +92,36 @@ void moveBall()
       }
     }
   }
-  Serial.print(acc_x * speed_x);
-  Serial.print("  ");
-  Serial.print(isOk_x);
-  Serial.print("  ");
-  Serial.print(acc_y * speed_y);
-  Serial.print("  ");
-  Serial.println(isOk_y);
   x += (acc_x * speed_x) * isOk_x;
   y += (acc_y * speed_y) * isOk_y;
+  if (count % 4 == 0)
+  {
+    Serial.print(acc_x * speed_x);
+    Serial.print("  ");
+    Serial.print(isOk_x);
+    Serial.print("  ");
+    Serial.print((acc_x * speed_x) * isOk_x);
+    Serial.print("  ");
+    Serial.print(acc_y * speed_y);
+    Serial.print("  ");
+    Serial.print(isOk_y);
+    Serial.print("  ");
+    Serial.println((acc_y * speed_y) * isOk_y);
+  }
 
-  x = max((int)x, 10);
-  y = max((int)y, 10);
-  x = min((int)x, 300);
-  y = min((int)y, 220);
+  if (x < 10)
+    x = 10;
+  else if (x > 300)
+    x = 300;
+  if (y < 10)
+    y = 10;
+  else if (y > 220)
+    y = 220;
 
   //ボールの軌跡を消す
   printBackground(x, y);
   //ボールの位置がズレているのでoffset（現物合わせ）
-  M5.Lcd.fillCircle((int)x + 7, (int)y + 7, BALLSIZE, GREEN); // x,y,r,color
+  M5.Lcd.fillCircle((int)x + 1, (int)y + 1, BALLSIZE, GREEN); // x,y,r,color
 }
 
 void initMPU6050()
@@ -181,7 +201,6 @@ void setup()
   initStage();
 }
 
-long count = 0;
 unsigned long pre = 0;
 
 void loop()
@@ -209,12 +228,6 @@ void loop()
   acc_y = -axRaw / 16384.0;
   // acc_z = azRaw / 16384.0;
 
-  /*
-    Serial.print(acc_x);
-    Serial.print(" , ");
-    Serial.print(acc_y);
-    Serial.println("");
-  */
   moveBall();
 
   if (count % 40 == 0)
