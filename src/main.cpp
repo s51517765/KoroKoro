@@ -26,6 +26,7 @@ float speed_y = -3;
 float touch_level = 4;
 
 int maze[MEIRO_HEIGHT][MEIRO_WIDTH];
+int Goal_xy[2];
 
 void printBackground(int x, int y)
 {
@@ -120,8 +121,16 @@ void moveBall()
 
   //ボールの軌跡を消す
   printBackground(x, y);
-  //ボールの位置がズレているのでoffset（現物合わせ）
-  M5.Lcd.fillCircle((int)x + 1, (int)y + 1, BALLSIZE, GREEN); // x,y,r,color
+  //ボールの位置
+  M5.Lcd.fillCircle((int)x, (int)y, BALLSIZE, GREEN); // x,y,r,color
+
+  //ゴールの位置
+  M5.Lcd.fillCircle((int)((Goal_xy[0] + 0.5) * BLOCKSIZE), (int)((Goal_xy[1] + 0.5) * BLOCKSIZE), BALLSIZE, RED); // x,y,r,color
+  m5.Lcd.setTextColor(WHITE);
+  M5.Lcd.setTextSize(2);
+  m5.Lcd.setCursor((Goal_xy[0] + 0.2) * BLOCKSIZE, (Goal_xy[1] + 0.2) * BLOCKSIZE);
+  M5.Lcd.print("G");
+  Serial.println(Goal_xy[0]);
 }
 
 void initMPU6050()
@@ -174,6 +183,7 @@ void initStage()
 
 void dispSpeed()
 {
+  M5.Lcd.setTextSize(5);
   m5.Lcd.setTextColor(RED);
   m5.Lcd.setCursor(300, 100);
   M5.Lcd.print("SPEED ");
@@ -199,6 +209,8 @@ void setup()
   createMaze();
   printMaze();
   initStage();
+  for (int i = 0; i < 2; i++)
+    Goal_xy[i] = returnGoal(i);
 }
 
 unsigned long pre = 0;

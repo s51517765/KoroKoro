@@ -18,6 +18,9 @@
 /* 迷路の各マスの情報を格納する配列 */
 static int maze[MEIRO_HEIGHT][MEIRO_WIDTH] = {};
 
+int mazeDepth = 0;
+int mazeDepthMax = 0;
+int maxDepthGoal_xy[2];
 void initRand(void)
 {
   /* 現在の時刻を取得 */
@@ -55,6 +58,10 @@ int returnMaze(int j, int i)
 {
   return maze[j][i];
 }
+int returnGoal(int i)
+{
+  return maxDepthGoal_xy[i];
+}
 
 void dig(int i, int j)
 {
@@ -80,6 +87,7 @@ void dig(int i, int j)
       {
         if (maze[j - 2][i] == WALL)
         {
+          mazeDepth += 1;
           maze[j - 2][i] = PATH;
           maze[j - 1][i] = PATH;
           dig(i, j - 2);
@@ -93,6 +101,7 @@ void dig(int i, int j)
       {
         if (maze[j + 2][i] == WALL)
         {
+          mazeDepth += 1;
           maze[j + 2][i] = PATH;
           maze[j + 1][i] = PATH;
           dig(i, j + 2);
@@ -106,6 +115,7 @@ void dig(int i, int j)
       {
         if (maze[j][i - 2] == WALL)
         {
+          mazeDepth += 1;
           maze[j][i - 2] = PATH;
           maze[j][i - 1] = PATH;
           dig(i - 2, j);
@@ -119,6 +129,7 @@ void dig(int i, int j)
       {
         if (maze[j][i + 2] == WALL)
         {
+          mazeDepth += 1;
           maze[j][i + 2] = PATH;
           maze[j][i + 1] = PATH;
           dig(i + 2, j);
@@ -128,6 +139,19 @@ void dig(int i, int j)
       break;
     }
   }
+  if (mazeDepthMax < mazeDepth)
+  {
+    mazeDepthMax = mazeDepth;
+    maxDepthGoal_xy[0] = i;
+    maxDepthGoal_xy[1] = j;
+  }
+  mazeDepth -= 1;
+  Serial.println("Max Depth");
+  Serial.print(mazeDepth);
+  Serial.print(" ");
+  Serial.print(maxDepthGoal_xy[0]);
+  Serial.print(" ");
+  Serial.println(maxDepthGoal_xy[1]);
 }
 
 void createMaze()
@@ -153,9 +177,3 @@ void createMaze()
   /* マス(i,j)を起点に穴を掘る */
   dig(i, j);
 }
-
-/*
-  initRand();
-  createMaze();
-  printMaze();
-*/

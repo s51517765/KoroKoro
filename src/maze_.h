@@ -6,5 +6,6 @@ void printMaze();
 void dig(int i, int j);
 void createMaze();
 int returnMaze(int j, int i);
+int returnGoal(int i);
 const int MEIRO_WIDTH = 15;
 const int MEIRO_HEIGHT = 11;
