@@ -188,7 +188,7 @@ void initStage()
 
 void dispSpeed()
 {
-  M5.Lcd.setTextSize(5);
+  M5.Lcd.setTextSize(2);
   m5.Lcd.setTextColor(RED);
   m5.Lcd.setCursor(300, 100);
   M5.Lcd.print("SPEED ");
@@ -196,6 +196,50 @@ void dispSpeed()
 
   M5.Lcd.print(sp);
 }
+bool isGoaled()
+{
+  return (x - (Goal_xy[0] +0.2)* BLOCKSIZE) * (x -( Goal_xy[0]+0.2) * BLOCKSIZE) + (y - (Goal_xy[1]+0.2) * BLOCKSIZE) * (y - (Goal_xy[1]+0.2) * BLOCKSIZE) < BLOCKSIZE * BLOCKSIZE / touch_level ;
+}
+
+void dispTime()
+{
+  M5.Lcd.setTextSize(5);
+  int j = 0;
+  for (int i = MEIRO_WIDTH - 4; i < MEIRO_WIDTH; i++)
+  {
+    if (maze[j][i] == 1)
+    {
+      if ((i + j) % 2 == 0)
+      {
+        M5.Lcd.fillRect(i * BLOCKSIZE, j * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE, ORANGE); // x-pos,y-pos,x-size,y-size,color //orange 0xFD20
+      }
+      else
+      {
+        M5.Lcd.fillRect(i * BLOCKSIZE, j * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE, YELLOW);
+      }
+    }
+  }
+  M5.Lcd.setTextSize(2);
+  m5.Lcd.setTextColor(BLUE);
+  unsigned long t = (micros() - start_time) / 1000;
+  if (t / 1000 > 999)
+  {
+    start_time = micros();
+    t = 0;
+  }
+
+  m5.Lcd.setCursor(170, 2);
+  M5.Lcd.print("Time: ");
+  m5.Lcd.setCursor(230, 2);
+  String st = String(t / 1000) + ":" + String(t % 1000);
+  M5.Lcd.print(st);
+  while (isGoaled())
+  {
+    //ゴールしたらここで止まる
+    // Press power button to Restart.
+  }
+}
+
 void setup()
 {
   Wire.begin();
@@ -247,6 +291,7 @@ void loop()
   // acc_z = azRaw / 16384.0;
 
   moveBall();
+  dispTime();
 
   if (count % 40 == 0)
   {
