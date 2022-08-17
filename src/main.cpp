@@ -9,7 +9,7 @@
 #define MPU6050_WHO_AM_I 0x75   // Read Only
 #define MPU6050_PWR_MGMT_1 0x6B // Read and Write
 #define MPU_ADDRESS 0x68
-#define stepPeriod 30 //画面更新周期
+#define stepPeriod 20 //画面更新周期
 float BLOCKSIZE = 21;
 int BALLSIZE = 7;
 long count = 0;
@@ -21,12 +21,13 @@ float acc_y = 0;
 float x = BLOCKSIZE * 1.2;
 float y = BLOCKSIZE * 1.2;
 //速度
-float speed_x = 3;
-float speed_y = -3;
+float speed_x = 10;
+float speed_y = -10;
 float touch_level = 4;
 
 int maze[MEIRO_HEIGHT][MEIRO_WIDTH];
 int Goal_xy[2];
+unsigned long start_time;
 
 void printBackground(int x, int y)
 {
@@ -69,17 +70,21 @@ void moveBall()
 
   if (h_start < 0)
     h_start = 0;
-  else if (h_start > MEIRO_HEIGHT - 3)
-    h_start = MEIRO_HEIGHT - 3;
+  else if (h_start > MEIRO_HEIGHT - 1)
+    h_start = MEIRO_HEIGHT - 1;
   if (w_start < 0)
     w_start = 0;
-  else if (w_start > MEIRO_WIDTH - 3)
-    w_start = MEIRO_WIDTH - 3;
+  else if (w_start > MEIRO_WIDTH - 1)
+    w_start = MEIRO_WIDTH - 1;
 
   for (float j = h_start; j < h_start + 3; j += 0.5)
   {
+    if (j > MEIRO_HEIGHT)
+      continue;
     for (float i = w_start; i < w_start + 3; i += 0.5)
     {
+      if (i > MEIRO_WIDTH)
+        continue;
       if (maze[(int)(j)][(int)(i)] == 1)
       {
         if ((j * BLOCKSIZE - y) * (j * BLOCKSIZE - y) + (i * BLOCKSIZE - x - acc_x * speed_x) * (i * BLOCKSIZE - x - acc_x * speed_x) < BLOCKSIZE * BLOCKSIZE / touch_level)
@@ -211,6 +216,7 @@ void setup()
   initStage();
   for (int i = 0; i < 2; i++)
     Goal_xy[i] = returnGoal(i);
+  start_time = micros();
 }
 
 unsigned long pre = 0;
