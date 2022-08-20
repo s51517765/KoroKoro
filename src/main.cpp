@@ -28,7 +28,7 @@ float touch_level = 4;
 int maze[MEIRO_HEIGHT][MEIRO_WIDTH];
 int Goal_xy[2];
 unsigned long start_time;
-
+unsigned long pre = 0;
 void printBackground(int x, int y)
 {
   //迷路を描画
@@ -135,7 +135,6 @@ void moveBall()
   M5.Lcd.setTextSize(2);
   m5.Lcd.setCursor((Goal_xy[0] + 0.2) * BLOCKSIZE, (Goal_xy[1] + 0.2) * BLOCKSIZE);
   M5.Lcd.print("G");
-  Serial.println(Goal_xy[0]);
 }
 
 void initMPU6050()
@@ -198,7 +197,7 @@ void dispSpeed()
 }
 bool isGoaled()
 {
-  return (x - (Goal_xy[0] +0.2)* BLOCKSIZE) * (x -( Goal_xy[0]+0.2) * BLOCKSIZE) + (y - (Goal_xy[1]+0.2) * BLOCKSIZE) * (y - (Goal_xy[1]+0.2) * BLOCKSIZE) < BLOCKSIZE * BLOCKSIZE / touch_level ;
+  return (x - (Goal_xy[0] + 0.2) * BLOCKSIZE) * (x - (Goal_xy[0] + 0.2) * BLOCKSIZE) + (y - (Goal_xy[1] + 0.2) * BLOCKSIZE) * (y - (Goal_xy[1] + 0.2) * BLOCKSIZE) < BLOCKSIZE * BLOCKSIZE / touch_level;
 }
 
 void dispTime()
@@ -240,6 +239,39 @@ void dispTime()
   }
 }
 
+void startMenue()
+{
+  m5.Lcd.fillScreen(BLACK);
+  m5.Lcd.setTextColor(GREEN);
+
+  bool print = false;
+  while (true)
+  {
+    bool start = false;
+    M5.Lcd.setCursor(60, 105);
+    if (print)
+      M5.Lcd.print(">START<");
+    else
+      m5.Lcd.fillScreen(BLACK);
+    print = !print;
+    M5.Lcd.drawTriangle(150, 200, 170, 200, 160, 215, GREEN);
+    m5.Lcd.setTextSize(5);
+    while (millis() - pre < 1000)
+    {
+      M5.update(); //ボタンを読み取る
+      if (M5.BtnB.wasReleased() || M5.BtnB.pressedFor(1000, 200))
+      {
+        start = true;
+      }
+    }
+    pre = millis();
+    if (start)
+    {
+      break;
+    }
+  }
+}
+
 void setup()
 {
   Wire.begin();
@@ -251,7 +283,7 @@ void setup()
   M5.begin(true, false, true);
   M5.Power.begin();
   // LCDに表示
-  m5.Lcd.fillScreen(BLACK);
+  startMenue();
   m5.Lcd.setTextColor(YELLOW);
   m5.Lcd.setCursor(0, 0);
   initRand();
@@ -262,8 +294,6 @@ void setup()
     Goal_xy[i] = returnGoal(i);
   start_time = micros();
 }
-
-unsigned long pre = 0;
 
 void loop()
 {
@@ -299,7 +329,7 @@ void loop()
   }
   count += 1;
 
-  if (M5.BtnA.wasReleased() || M5.BtnB.pressedFor(1000, 200))
+  if (M5.BtnA.wasReleased() || M5.BtnA.pressedFor(1000, 200))
   {
     speed_x *= 1.111;
     speed_y *= 1.111;
@@ -315,7 +345,7 @@ void loop()
     dispSpeed();
     delay(200);
   }
-  if (M5.BtnC.wasReleased() || M5.BtnB.pressedFor(1000, 200))
+  if (M5.BtnC.wasReleased() || M5.BtnC.pressedFor(1000, 200))
   {
     initStage();
   }
