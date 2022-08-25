@@ -241,6 +241,7 @@ void dispTime()
 
 void startMenue()
 {
+  Serial.println("Start menu");
   m5.Lcd.fillScreen(BLACK);
   m5.Lcd.setTextColor(GREEN);
 
@@ -272,6 +273,31 @@ void startMenue()
   }
 }
 
+void countDown()
+{
+  int posi_x = 140;
+  int posi_y = 100;
+  int offset = 25;
+  int x, y;
+  int step = 24;
+  for (int j = 0; j < 3; j++)
+  {
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextSize(10);
+    M5.Lcd.setTextColor(YELLOW);
+    M5.Lcd.setCursor(150, 105);
+    M5.lcd.print(3 - j);
+    M5.Lcd.setTextSize(5);
+    for (int i = 0; i < step; i++)
+    {
+      x = posi_x + offset + 80 * cos(float(i * PI * 2 / step));
+      y = posi_y + offset + 80 * sin(float(i * PI * 2 / step));
+      M5.Lcd.fillCircle(x, y, 5, GREEN);
+      delay(1000 / step);
+    }
+  }
+  M5.Lcd.fillScreen(BLACK);
+}
 void setup()
 {
   Wire.begin();
@@ -289,9 +315,12 @@ void setup()
   initRand();
   createMaze();
   printMaze();
-  initStage();
+
   for (int i = 0; i < 2; i++)
     Goal_xy[i] = returnGoal(i);
+
+  countDown();
+  initStage();
   start_time = micros();
 }
 
