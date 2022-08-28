@@ -290,8 +290,8 @@ void countDown()
     M5.Lcd.setTextSize(5);
     for (int i = 0; i < step; i++)
     {
-      x = posi_x + offset + 80 * cos(float(i * PI * 2 / step));
-      y = posi_y + offset + 80 * sin(float(i * PI * 2 / step));
+      x = posi_x + offset + 80 * sin(float(i * PI * 2 / step));
+      y = posi_y + offset - 80 * cos(float(i * PI * 2 / step));
       M5.Lcd.fillCircle(x, y, 5, GREEN);
       delay(1000 / step);
     }
