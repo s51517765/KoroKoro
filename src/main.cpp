@@ -199,6 +199,58 @@ bool isGoaled()
 {
   return (x - (Goal_xy[0] + 0.2) * BLOCKSIZE) * (x - (Goal_xy[0] + 0.2) * BLOCKSIZE) + (y - (Goal_xy[1] + 0.2) * BLOCKSIZE) * (y - (Goal_xy[1] + 0.2) * BLOCKSIZE) < BLOCKSIZE * BLOCKSIZE / touch_level;
 }
+void showResult(unsigned long t, bool tooLongTime)
+{
+  M5.Lcd.setTextSize(5);
+  for (int j = MEIRO_HEIGHT - 1; j >= 0; j--)
+  {
+    for (int i = MEIRO_WIDTH - 1; i >= 0; i--)
+    {
+      M5.Lcd.fillRect(i * BLOCKSIZE, j * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE, BLACK); // x-pos,y-pos,x-size,y-size,color //orange 0xFD20
+      delay(15);
+    }
+  }
+
+  // m5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setTextSize(4);
+  m5.Lcd.setTextColor(YELLOW);
+  M5.Lcd.setCursor(30, 30);
+  if (tooLongTime)
+  {
+    M5.Lcd.println("To Long Time");
+  }
+  else
+  {
+    M5.Lcd.print("Time ");
+    M5.Lcd.setCursor(140, 30);
+    String st = String(t / 1000) + ":" + String(t % 1000);
+    M5.Lcd.print(st);
+  }
+
+  M5.Lcd.setCursor(80, 80);
+  if (t < 5000)
+    M5.Lcd.println("Excellent");
+  else if (t < 10000)
+    M5.Lcd.println("Good");
+  else if (t < 20000)
+    M5.Lcd.println("Soso");
+  else
+    M5.Lcd.println("Poor");
+  M5.Lcd.setTextSize(2);
+  while (true)
+  {
+    M5.Lcd.setCursor(0, 180);
+    m5.Lcd.setTextColor(GREEN);
+    M5.Lcd.println("    Press power button");
+    M5.Lcd.println("        to restart.");
+    delay(1000);
+    M5.Lcd.setCursor(0, 180);
+    m5.Lcd.setTextColor(BLACK);
+    M5.Lcd.println("    Press power button");
+    M5.Lcd.println("        to restart.");
+    delay(1000);
+  }
+}
 
 void dispTime()
 {
@@ -220,11 +272,13 @@ void dispTime()
   }
   M5.Lcd.setTextSize(2);
   m5.Lcd.setTextColor(BLUE);
-  unsigned long t = (micros() - start_time) / 1000;
+  unsigned long t = (micros() - start_time) / 1000; // ms
+  bool tooLongTime = false;
   if (t / 1000 > 999)
   {
     start_time = micros();
     t = 0;
+    tooLongTime = true;
   }
 
   m5.Lcd.setCursor(170, 2);
@@ -232,11 +286,8 @@ void dispTime()
   m5.Lcd.setCursor(230, 2);
   String st = String(t / 1000) + ":" + String(t % 1000);
   M5.Lcd.print(st);
-  while (isGoaled())
-  {
-    //ゴールしたらここで止まる
-    // Press power button to Restart.
-  }
+  if (isGoaled())
+    showResult(t, tooLongTime);
 }
 
 void startMenue()
@@ -309,6 +360,9 @@ void setup()
   M5.begin(true, false, true);
   M5.Power.begin();
   // LCDに表示
+
+  // showResult(15601, false);
+
   startMenue();
   m5.Lcd.setTextColor(YELLOW);
   m5.Lcd.setCursor(0, 0);
